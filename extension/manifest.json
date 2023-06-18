@@ -1,0 +1,17 @@
+{
+    "manifest_version": 3,
+    "name": "Task Recorder",
+    "version": "1.0",
+    "description": "Record tasks in the format of a todo list",
+    "content_scripts": [
+        {
+          "html": ["home.html"],
+          "js": ["scripts/content.js"],
+          "matches": [
+            "https://developer.chrome.com/docs/extensions/*",
+            "https://developer.chrome.com/docs/webstore/*",
+            "https://www.google.com/*"
+          ]
+        }
+    ]
+}
