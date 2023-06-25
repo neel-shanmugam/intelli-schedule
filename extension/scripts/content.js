@@ -1,3 +1,8 @@
+
+document.addEventListener("click", () => {
+  chrome.runtime.sendMessage({ action: "openPopup" });
+});
+
 // HTML elements
 const taskInput = document.getElementById("task-input");
 const addButton = document.getElementById("add-button");
@@ -5,6 +10,8 @@ const taskList = document.getElementById("task-list");
 
 // Event listener for the "Add" button
 addButton.addEventListener("click", addTask);
+
+
 
 // Event listener for the "Enter" key press
 taskInput.addEventListener("keypress", function (event) {

@@ -3,6 +3,16 @@
     "name": "Task Recorder",
     "version": "1.0",
     "description": "Record tasks in the format of a todo list",
+    "permissions": [
+      "tabs",
+      "windows"
+    ],
+    "background": {
+      "service_worker": "scripts/background.js"
+    },
+    "action": {
+      "default_popup": "home.html"
+    },
     "content_scripts": [
         {
           "html": ["home.html"],
