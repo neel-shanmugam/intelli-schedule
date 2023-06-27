@@ -5,7 +5,8 @@
     "description": "Record tasks in the format of a todo list",
     "permissions": [
       "tabs",
-      "windows"
+      "windows",
+      "storage"
     ],
     "background": {
       "service_worker": "scripts/background.js"
