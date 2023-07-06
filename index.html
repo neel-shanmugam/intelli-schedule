@@ -1,11 +1,76 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Google Calendar API Quickstart</title>
+    <title>Google Calendar</title>
     <meta charset="utf-8" />
+    <style>
+      body {
+        background-color: #f2f2f2;
+      }
+      
+      p.title {
+        font-family: Arial, sans-serif;
+        font-size: 24px;
+        font-weight: bold;
+        color: #333333;
+        text-align: center;
+        padding: 20px 0;
+      }
+
+      #events_table {
+        font-family: Arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+      }
+  
+      #events_table td,
+      #events_table th {
+        border: 1px solid #ddd;
+        padding: 8px;
+      }
+  
+      #events_table tr:nth-child(even) {
+        background-color: #ffffff;
+      }
+  
+      #events_table th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: #3498db;
+        color: white;
+      }
+
+      /* Edit button styles */
+      #authorize_button,
+      #signout_button {
+        background-color: #3498db;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        border-radius: 8px;
+        transition: background-color 0.3s;
+      }
+
+      /* Add hover effect to buttons */
+      #authorize_button:hover,
+      #signout_button:hover {
+        background-color: #2980b9;
+        cursor: pointer;
+      }
+
+      /* Adjust table style */
+      #content table {
+        margin-top: 20px;
+      }
+    </style>
   </head>
   <body>
-    <p>Google Calendar API Quickstart</p>
+    <p>Google Calendar Events</p>
 
     <!--Add buttons to initiate auth sequence and sign out-->
     <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
@@ -121,7 +186,7 @@
        * the authorized user's calendar. If no events are found an
        * appropriate message is printed.
        */
-      async function listUpcomingEvents() {
+       async function listUpcomingEvents() {
         let response;
         try {
           const request = {
@@ -143,11 +208,40 @@
           document.getElementById('content').innerText = 'No events found.';
           return;
         }
-        // Flatten to string to display
-        const output = events.reduce(
-            (str, event) => `${str}${event.summary} (${event.start.dateTime || event.start.date})\n`,
-            'Events:\n');
-        document.getElementById('content').innerText = output;
+        // Create a table to display
+        let output = `<table id="events_table">
+                        <tr>
+                          <th>Event</th>
+                          <th>Start Time</th>
+                        </tr>`;
+        events.forEach(event => {
+          const startDate = new Date(event.start.dateTime || event.start.date);
+          const endDate = new Date(event.end.dateTime || event.end.date);
+
+          const options = { month: 'long', day: 'numeric', year: 'numeric' };
+          const formattedDate = startDate.toLocaleDateString(undefined, options);
+
+          const startTime = formatAMPM(startDate);
+          const endTime = formatAMPM(endDate);
+
+          output += `<tr>
+                      <td>${event.summary}</td>
+                      <td>${formattedDate}, ${startTime} - ${endTime}</td>
+                    </tr>`;
+        });
+        output += '</table>';
+        document.getElementById('content').innerHTML = output;
+      }
+
+      function formatAMPM(date) {
+        let hours = date.getHours();
+        let minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        const strTime = hours + ':' + minutes + ' ' + ampm;
+        return strTime;
       }
     </script>
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
