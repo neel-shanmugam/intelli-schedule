@@ -1,10 +1,22 @@
+document.addEventListener("DOMContentLoaded", function() {
+  const openCalendarButton = document.getElementById("open-calendar-button");
+  openCalendarButton.addEventListener("click", function() {
+      chrome.runtime.sendMessage({ action: "openCalendar" });
+  });
+});
+
+document.addEventListener("click", (event) => {
+  if (event.target.id === "open-calendar-button") {
+    chrome.runtime.sendMessage({ action: "openCalendar" });
+  }
+});
+
 document.addEventListener("click", () => {
   chrome.runtime.sendMessage({ action: "openPopup" });
 });
 
 // HTML elements
 const taskInput = document.getElementById("task-input");
-const timeInput = document.getElementById("time-input");
 const addButton = document.getElementById("add-button");
 const taskList = document.getElementById("task-list");
 
@@ -24,21 +36,14 @@ document.addEventListener("DOMContentLoaded", loadTasks);
 // Function to add a task
 function addTask() {
   const task = taskInput.value.trim();
-  const time = timeInput.value.trim();
-  if (isNaN(time)) {
-    alert("Please enter a valid number for the estimated time.");
-    return;
-  }
-  if (task !== "" && time !== "") {
-    const listItem = createTaskItem(task, time);
+  if (task !== "") {
+    const listItem = createTaskItem(task);
     taskList.appendChild(listItem);
     taskInput.value = "";
-    timeInput.value = "";
 
-    saveTask({task, time});
+    saveTask(task);
   }
 }
-
 
 // Function to save a task
 function saveTask(task) {
@@ -54,24 +59,24 @@ function loadTasks() {
   chrome.storage.sync.get({ tasks: [] }, function (result) {
     const tasks = result.tasks;
     tasks.forEach(function (task) {
-      const listItem = createTaskItem(task.task, task.time);
+      const listItem = createTaskItem(task);
       taskList.appendChild(listItem);
     });
   });
 }
 
 // Function to create a task item
-function createTaskItem(task, time) {
+function createTaskItem(task) {
   const listItem = document.createElement("li");
   const taskText = document.createElement("span");
-  taskText.textContent = `${task} (Time: ${time} ${time == 1 ? 'hour' : 'hours'})`;
+  taskText.textContent = task;
   listItem.appendChild(taskText);
 
   const deleteButton = document.createElement("button");
   deleteButton.textContent = "x";
   deleteButton.className = "delete-button";
   deleteButton.addEventListener("click", function () {
-    deleteTask(listItem, task);
+    deleteTask(listItem);
   });
 
   listItem.appendChild(deleteButton);
@@ -89,11 +94,12 @@ function createTaskItem(task, time) {
 }
 
 // Function to delete a task
-function deleteTask(taskItem, taskName) {
+function deleteTask(taskItem) {
   taskItem.remove();
+  const taskText = taskItem.querySelector("span").textContent;
   chrome.storage.sync.get({ tasks: [] }, function (result) {
     const tasks = result.tasks;
-    const index = tasks.findIndex(task => task.task === taskName);
+    const index = tasks.indexOf(taskText);
     if (index !== -1) {
       tasks.splice(index, 1);
       chrome.storage.sync.set({ tasks: tasks });
