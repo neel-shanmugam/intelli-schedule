@@ -1,0 +1,56 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+
+#task-input,
+#time-input,
+#add-button {
+  padding: 10px;
+  font-size: 16px;
+  width: 200px;
+  border-radius: 15px;
+}
+
+#time-input{
+  margin-top: 5px;
+}
+
+#add-button {
+  margin-top: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+#add-button:hover {
+  background-color: #0056b3;
+}
+
+#task-list {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+#task-list li {
+  position: relative;
+  font-size: 16px;
+  padding: 10px;
+  padding-right: 30px;
+  border-bottom: 1px solid #ccc;
+}
+
+#task-list li:last-child {
+  border-bottom: none;
+}
+
+#task-list .delete-button {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  display: none;
+}

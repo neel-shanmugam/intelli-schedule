@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Task Recorder",
+  "version": "1.0",
+  "description": "Record tasks in the format of a todo list",
+  "permissions": [
+    "tabs",
+    "windows",
+    "storage",
+    "identity",
+    "contextMenus"
+  ],
+  "oauth2": {
+    "client_id": "850211610149-449f2shg2loo9o5p4eqsnpoglhpaho42.apps.googleusercontent.com",
+    "scopes": ["https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.freebusy"]
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "home.html"
+  },
+  "content_scripts": [
+      {
+        "html": ["home.html"],
+        "js": ["scripts/content.js"],
+        "matches": [
+          "https://developer.chrome.com/docs/extensions/*",
+          "https://developer.chrome.com/docs/webstore/*",
+          "https://www.google.com/*"
+        ]
+      }
+  ]
+}
