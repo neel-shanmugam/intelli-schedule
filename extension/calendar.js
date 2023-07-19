@@ -27,10 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
         chrome.identity.getAuthToken({ 'interactive': true, 'scopes': SCOPES}, function(token) {
             if (chrome.runtime.lastError) {
                 alert(chrome.runtime.lastError.message);
-            } else {
-                console.log("Access token acquired: " + token);
-                alert("Access token acquired: " + token);
-            }
+            } 
         });
     });
 });
@@ -68,7 +65,6 @@ function listUpcomingEvents(token) {
         if (!when) {
           when = event.start.date;
         }
-        alert(event.summary + ' (' + when + ')')
       }
     } else {
       alert('No upcoming events found.');

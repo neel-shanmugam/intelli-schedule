@@ -7,6 +7,7 @@ chrome.runtime.onInstalled.addListener(() => {
       contexts: ["action"]
     });
   });
+  
   chrome.contextMenus.onClicked.addListener((info, tab) => {
     if (info.menuItemId === "openPopup") {
       chrome.windows.create({
