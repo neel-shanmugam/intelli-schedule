@@ -1,5 +1,5 @@
 // TODO(developer): Set to client ID from the Developer Console
-const CLIENT_ID = '850211610149-449f2shg2loo9o5p4eqsnpoglhpaho42.apps.googleusercontent.com';
+const CLIENT_ID = '760592949122-eeig8dofiiven0t5ct12s7o48n82betb.apps.googleusercontent.com';
 const REDIRECT_URL = chrome.identity.getRedirectURL('provider_cb');
 const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
 const SCOPES = [

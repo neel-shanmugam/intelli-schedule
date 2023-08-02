@@ -6,6 +6,7 @@ body {
 
 #task-input,
 #time-input,
+#deadline-input,  /* add this line */
 #add-button {
   padding: 10px;
   font-size: 16px;
@@ -13,7 +14,8 @@ body {
   border-radius: 15px;
 }
 
-#time-input{
+#time-input,
+#deadline-input {  /* add this line */
   margin-top: 5px;
 }
 

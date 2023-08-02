@@ -5,13 +5,14 @@
   "description": "Record tasks in the format of a todo list",
   "permissions": [
     "tabs",
+    "activeTab",
     "windows",
     "storage",
     "identity",
     "contextMenus"
   ],
   "oauth2": {
-    "client_id": "850211610149-449f2shg2loo9o5p4eqsnpoglhpaho42.apps.googleusercontent.com",
+    "client_id": "760592949122-eeig8dofiiven0t5ct12s7o48n82betb.apps.googleusercontent.com",
     "scopes": ["https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.freebusy"]
   },
   "background": {
