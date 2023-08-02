@@ -1,6 +1,7 @@
 document.addEventListener("click", () => {
   console.log('Document clicked');
   chrome.runtime.sendMessage({ action: "openPopup" });
+  loadTasks();
 });
 
 const taskInput = document.getElementById("task-input");

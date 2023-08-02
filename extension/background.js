@@ -1,5 +1,6 @@
 let googleAuthToken = '';
 
+
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
       id: "openPopup",
@@ -49,24 +50,48 @@ chrome.runtime.onInstalled.addListener(() => {
   function roundToQuarterHour(date) {
     let minutes = date.getMinutes();
     let remainder = minutes % 15;
-    if (remainder >= 8) {
-      date.setMinutes(minutes + 15 - remainder);
-    } else {
-      date.setMinutes(minutes - remainder);
-    }
+    date.setMinutes(minutes - remainder);
     date.setSeconds(0);
     date.setMilliseconds(0);
     return date;
-}
+  }
+
+  // function listCalendarIds(token) {
+  //   console.log('Listing Calendar IDs with token:', token);
+  //   let calendarIds = [];
+  
+  //   // return a new Promise
+  //   return new Promise((resolve, reject) => {
+  //     fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList', {
+  //       headers: {
+  //         'Authorization': `Bearer ${token}`,
+  //         'Accept': 'application/json'
+  //       }
+  //     })
+  //     .then(response => response.json())
+  //     .then(data => {
+  //       // data.items.forEach(item => {
+  //       //   // Only push to the array if the id does not contain 'group'
+  //       //   if (!item.id.includes('import')) {
+  //       //     calendarIds.push(item.id);
+  //       //   }
+  //       // });
+  //       console.log('Calendar IDs:', calendarIds);
+  //       resolve(calendarIds); // resolve promise with calendarIds
+  //     })
+  //     .catch(error => {
+  //       console.error('Error:', error);
+  //       reject(error); // reject promise with error
+  //     });
+  //   });
+  // }
 
   function listFreeSlots(taskData, token) {
     console.log("Listing free slots with token:", token);
-    
+  
     let now = new Date();
     let deadline = new Date(taskData.deadline);
-    
-
-    
+  
     let body = {
       timeMin: now.toISOString(),
       timeMax: deadline.toISOString(),
@@ -91,19 +116,18 @@ chrome.runtime.onInstalled.addListener(() => {
     })
     .then(data => {
       console.log('Data from freeBusy:', data);
-      
+  
       if (data.calendars && data.calendars.primary) {
         let busyTimes = data.calendars.primary.busy;
         let taskDuration = parseFloat(taskData.time) * 60 * 60 * 1000;
   
-        let suitableSlotFound = false;
+        let freeSlots = [];
         let freeSlotStart, freeSlotEnd;
-        console.log('Busy times: ', busyTimes.length);
   
         for (let i = 0; i <= busyTimes.length; i++) {
           if(i == 0) {
             freeSlotStart = new Date(body.timeMin);
-            freeSlotEnd = new Date(busyTimes[i].start);
+            freeSlotEnd = busyTimes[i] ? new Date(busyTimes[i].start) : new Date(body.timeMax);
           } else if(i == busyTimes.length) {
             freeSlotStart = new Date(busyTimes[i-1].end);
             freeSlotEnd = new Date(body.timeMax);
@@ -112,23 +136,65 @@ chrome.runtime.onInstalled.addListener(() => {
             freeSlotEnd = new Date(busyTimes[i].start);
           }
           
-          let freeSlotDuration = freeSlotEnd - freeSlotStart;
-          console.log(`Checking free slot from ${freeSlotStart.toISOString()} to ${freeSlotEnd.toISOString()} with duration ${freeSlotDuration / (60 * 60 * 1000)} hours`);
+          if (freeSlotStart.getHours() < 9) {
+            freeSlotStart.setHours(9, 0, 0, 0);
+          }
   
-          console.log(freeSlotDuration, taskDuration);
+          if (freeSlotEnd.getHours() >= 21) {
+            freeSlotEnd.setHours(21, 0, 0, 0);
+          }
+  
+          // Checking if the free slot spans multiple days
+          if(freeSlotStart.getDate() !== freeSlotEnd.getDate()) {
+            let endOfFirstDay = new Date(freeSlotStart);
+            endOfFirstDay.setHours(21, 0, 0, 0);
+  
+            let startOfSecondDay = new Date(freeSlotEnd);
+            startOfSecondDay.setHours(9, 0, 0, 0);
+  
+            // Adding two free slots
+            freeSlots.push({start: freeSlotStart, end: endOfFirstDay});
+            freeSlots.push({start: startOfSecondDay, end: freeSlotEnd});
+          } else {
+            freeSlots.push({start: freeSlotStart, end: freeSlotEnd});
+          }
+        }
+  
+        for (let freeSlot of freeSlots) {
+          let freeSlotStart = freeSlot.start;
+          let freeSlotEnd = freeSlot.end;
+  
+          console.log(`Checking free slot from ${freeSlotStart.toISOString()} to ${freeSlotEnd.toISOString()}`);
+  
+          let freeSlotDuration = freeSlotEnd - freeSlotStart;
+  
           if (freeSlotDuration >= taskDuration) {
+            let currentTime = new Date();
             let eventStart = roundToQuarterHour(new Date(freeSlotStart));
+  
+            console.log(`Initial event start time: ${eventStart}`);
+  
+            if (eventStart < currentTime) {
+              console.log('Event start time is in the past, moving to the future.');
+              eventStart.setMinutes(eventStart.getMinutes() + 15);
+            }
+  
+            console.log(`Event start time after adjustment: ${eventStart}`);
+  
             if (eventStart.getTime() + taskDuration > freeSlotEnd.getTime() || eventStart.getTime() < freeSlotStart.getTime()) {
               console.log('Rounded start time is not suitable');
               continue;
             }
+  
             let eventEnd = new Date(eventStart.getTime() + taskDuration);
+  
+            console.log(`Event end time: ${eventEnd}`);
+  
             if (eventEnd > deadline) {
               console.log('Rounded end time exceeds the deadline');
               continue;
             }
-
-            suitableSlotFound = true;
+  
             let event = {
               summary: taskData.task,
               start: {
@@ -142,22 +208,18 @@ chrome.runtime.onInstalled.addListener(() => {
             console.log('Creating event:', event);
             createEvent(event, token);
             return {status: 'scheduled'};
-            break;
           }
         }
   
-        if (!suitableSlotFound) {
-          console.log('No suitable free slot found for task before the deadline.');
-          return {status: 'deadline'};
-          // console.error('Error: Task cannot be scheduled before the deadline');
-        }
-    
+        console.log('No suitable free slot found for task before the deadline.');
+        return {status: 'deadline'};
       } else {
         console.log('Data does not contain expected properties', data);
       }
     })
     .catch(error => console.error('Error:', error));
   }
+  
   
   
 
